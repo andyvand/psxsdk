@@ -1,109 +1,87 @@
-cmake_minimum_required(VERSION 3.12.0)
-project("PSX SDK Toolchain")
-
 include(ExternalProject)
 include(ProcessorCount)
 ProcessorCount(N)
 
-set(TOOLCHAIN_DIR "${CMAKE_CURRENT_LIST_DIR}")
-
-# llvm does not support MIPS-I, fails with:
-# Code generation for MIPS-I is not implemented
-#[[
-set(LLVM_RELEASE "9.0.1")
-
-ExternalProject_Add(llvm
-  GIT_REPOSITORY "https://github.com/llvm/llvm-project.git"
-  GIT_TAG "llvmorg-9.0.1"
-  PREFIX "${TOOLCHAIN_DIR}"
-  SOURCE_DIR "src/llvm"
-  SOURCE_SUBDIR "llvm"
-  INSTALL_DIR "."
-  BUILD_COMMAND ${CMAKE_COMMAND} --build . -j ${N}
-  CMAKE_ARGS
-    -DLLVM_TARGETS_TO_BUILD:STRING=Mips
-    -DLLVM_DEFAULT_TARGET_TRIPLE:STRING=mipsel-unknown-elf
-    -DLLVM_ENABLE_LTO:BOOL=ON
-    -DCMAKE_INSTALL_PREFIX:PATH=${TOOLCHAIN_DIR}
-    -DCMAKE_BUILD_TYPE:STRING=Release
-    -DLLVM_INCLUDE_TESTS:BOOL=OFF
-    -DLLVM_INCLUDE_GO_TESTS:BOOL=OFF
-    -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF
-    -DLLVM_INCLUDE_DOCS:BOOL=OFF
-    -DLLVM_ENABLE_DOXYGEN:BOOL=OFF
-    -DLLVM_ENABLE_PROJECTS:STRING=clang
-    -DLLVM_OPTIMIZED_TABLEGEN:BOOL=ON
-)
-]]
-
-
+set(TOOLCHAIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/toolchain")
+message(STATUS "TOOLCHAIN_DIR: ${TOOLCHAIN_DIR}")
 ExternalProject_Add(binutils
-                    URL                 http://ftp.gnu.org/gnu/binutils/binutils-2.33.1.tar.xz
-                    URL_HASH            SHA256=ab66fc2d1c3ec0359b8e08843c9f33b63e8707efdff5e4cc5c200eae24722cbf
-                    SOURCE_DIR          ${TOOLCHAIN_DIR}/src/binutils
-                    PREFIX              ${TOOLCHAIN_DIR}
+                    URL                 https://ftp.gnu.org/gnu/binutils/binutils-2.42.tar.xz
+                    URL_HASH            SHA256=f6e4d41fd5fc778b06b7891457b3620da5ecea1006c6a4a41ae998109f85a800
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
-                    CONFIGURE_COMMAND   ${TOOLCHAIN_DIR}/src/binutils/configure --prefix=${TOOLCHAIN_DIR} --target=mipsel-unknown-elf --with-float=soft
+                    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --target=mipsel-unknown-elf --with-float=soft --enable-lto --enable-static --disable-shared
                     BUILD_COMMAND       make -j${N}
                     INSTALL_COMMAND     make install
 )
 
 ExternalProject_Add(m4
-                    URL                 http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.xz
-                    URL_HASH            SHA256=f2c1e86ca0a404ff281631bdc8377638992744b175afb806e25871a24a934e07
-                    SOURCE_DIR          ${TOOLCHAIN_DIR}/src/m4
-                    PREFIX              ${TOOLCHAIN_DIR}
+                    URL                 http://ftp.gnu.org/gnu/m4/m4-1.4.19.tar.xz
+                    URL_HASH            SHA256=63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
-                    PATCH_COMMAND       patch -p1 < ${TOOLCHAIN_DIR}/patches/m4/libio_removal.patch
-                    CONFIGURE_COMMAND   ${TOOLCHAIN_DIR}/src/m4/configure --prefix=${TOOLCHAIN_DIR}
+                    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-static --disable-shared
                     BUILD_COMMAND       make -j${N}
                     INSTALL_COMMAND     make install
 )
 
 ExternalProject_Add(gmp
                     DEPENDS             m4
-                    URL                 https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz
-                    URL_HASH            SHA256=87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912
-                    SOURCE_DIR          ${TOOLCHAIN_DIR}/src/gmp
-                    PREFIX              ${TOOLCHAIN_DIR}
+                    URL                 https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+                    URL_HASH            SHA256=a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
-                    CONFIGURE_COMMAND   ${TOOLCHAIN_DIR}/src/gmp/configure --prefix=${TOOLCHAIN_DIR} M4=${TOOLCHAIN_DIR}/bin/m4
+                    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> M4=<INSTALL_DIR>/bin/m4 --enable-static --disable-shared
                     BUILD_COMMAND       make -j${N}
                     INSTALL_COMMAND     make install
 )
 
 ExternalProject_Add(mpfr
                     DEPENDS             gmp
-                    URL                 https://www.mpfr.org/mpfr-current/mpfr-4.0.2.tar.xz
-                    URL_HASH            SHA256=1d3be708604eae0e42d578ba93b390c2a145f17743a744d8f3f8c2ad5855a38a
-                    SOURCE_DIR          ${TOOLCHAIN_DIR}/src/mpfr
-                    PREFIX              ${TOOLCHAIN_DIR}
+                    URL                 https://www.mpfr.org/mpfr-current/mpfr-4.2.1.tar.xz
+                    URL_HASH            SHA256=277807353a6726978996945af13e52829e3abd7a9a5b7fb2793894e18f1fcbb2
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
-                    CONFIGURE_COMMAND   ${TOOLCHAIN_DIR}/src/mpfr/configure --prefix=${TOOLCHAIN_DIR} --with-gmp=${TOOLCHAIN_DIR}
+                    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --with-gmp=<INSTALL_DIR> --enable-lto --enable-static --disable-shared
                     BUILD_COMMAND       make -j${N}
                     INSTALL_COMMAND     make install
 )
 
 ExternalProject_Add(mpc
                     DEPENDS             gmp mpfr
-                    URL                 https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz
-                    URL_HASH            SHA256=6985c538143c1208dcb1ac42cedad6ff52e267b47e5f970183a3e75125b43c2e
-                    SOURCE_DIR          ${TOOLCHAIN_DIR}/src/mpc
-                    PREFIX              ${TOOLCHAIN_DIR}
+                    URL                 https://ftp.gnu.org/gnu/mpc/mpc-1.3.1.tar.gz
+                    URL_HASH            SHA256=ab642492f5cf882b74aa0cb730cd410a81edcdbec895183ce930e706c1c759b8
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
-                    CONFIGURE_COMMAND   ${TOOLCHAIN_DIR}/src/mpc/configure --prefix=${TOOLCHAIN_DIR} --with-gmp=${TOOLCHAIN_DIR} --with-mpfr=${TOOLCHAIN_DIR}
+                    CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --with-gmp=<INSTALL_DIR> --with-mpfr=<INSTALL_DIR> --enable-static --disable-shared
                     BUILD_COMMAND       make -j${N}
                     INSTALL_COMMAND     make install
 )
 
+set(gcc_version "13.2.0")
+set(gcc_version "${gcc_version}" PARENT_SCOPE)
 ExternalProject_Add(gcc
                     DEPENDS             binutils gmp mpfr mpc
-                    URL                 http://ftp.gnu.org/gnu/gcc/gcc-9.2.0/gcc-9.2.0.tar.xz
-                    URL_HASH            SHA256=ea6ef08f121239da5695f76c9b33637a118dcf63e24164422231917fa61fb206
-                    SOURCE_DIR          ${TOOLCHAIN_DIR}/src/gcc
-                    PREFIX              ${TOOLCHAIN_DIR}
+                    URL                 http://ftp.gnu.org/gnu/gcc/gcc-${gcc_version}/gcc-${gcc_version}.tar.xz
+                    URL_HASH            SHA256=e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
-                    CONFIGURE_COMMAND   PATH=${TOOLCHAIN_DIR}/bin:$ENV{PATH} LD_LIBRARY_PATH=${TOOLCHAIN_DIR}/lib ${TOOLCHAIN_DIR}/src/gcc/configure --prefix=${TOOLCHAIN_DIR} --disable-libada --disable-libssp --target=mipsel-unknown-elf --with-float=soft --with-gmp=${TOOLCHAIN_DIR} --with-gmp-lib=${TOOLCHAIN_DIR}/lib/libgmp.so --with-mpfr=${TOOLCHAIN_DIR} --with-mpfr-lib=${TOOLCHAIN_DIR}/lib/libmpfr.so --with-mpc=${TOOLCHAIN_DIR} --with-mpc-lib=${TOOLCHAIN_DIR}/lib/libmpc.so --disable-libquadmath --enable-stage1-languages=c --enable-languages=c --enable-lto
-                    BUILD_COMMAND       PATH=${TOOLCHAIN_DIR}/bin:$ENV{PATH} LD_LIBRARY_PATH=${TOOLCHAIN_DIR}/lib make -j${N}
-                    INSTALL_COMMAND     PATH=${TOOLCHAIN_DIR}/bin:$ENV{PATH} LD_LIBRARY_PATH=${TOOLCHAIN_DIR}/lib make install
+                    CONFIGURE_COMMAND   PATH=<INSTALL_DIR>/bin:$ENV{PATH} LD_LIBRARY_PATH=<INSTALL_DIR>/lib <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --disable-libada --disable-libssp --target=mipsel-unknown-elf --with-float=soft --with-gmp=<INSTALL_DIR> --with-gmp-lib=<INSTALL_DIR>/lib/libgmp.a --with-mpfr=<INSTALL_DIR> --with-mpfr-lib=<INSTALL_DIR>/lib/libmpfr.a --with-mpc=<INSTALL_DIR> --with-mpc-lib=<INSTALL_DIR>/lib/libmpc.a --disable-libquadmath --enable-stage1-languages=c --enable-languages=c --enable-lto --enable-static --disable-shared
+                    BUILD_COMMAND       PATH=<INSTALL_DIR>/bin:$ENV{PATH} LD_LIBRARY_PATH=<INSTALL_DIR>/lib make -j${N}
+                    INSTALL_COMMAND     PATH=<INSTALL_DIR>/bin:$ENV{PATH} LD_LIBRARY_PATH=<INSTALL_DIR>/lib make install
+)
+
+install(
+    DIRECTORY "${TOOLCHAIN_DIR}/"
+    DESTINATION .
+    USE_SOURCE_PERMISSIONS
+)
+
+install(
+    DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/share"
+    DESTINATION .
+    USE_SOURCE_PERMISSIONS
+)
+
+install(
+    FILES "${CMAKE_CURRENT_LIST_DIR}/psx.ld"
+    DESTINATION "lib/gcc/mipsel-unknown-elf/${gcc_version}/"
+)
+
+install(
+    DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/licenses"
+    DESTINATION share
 )

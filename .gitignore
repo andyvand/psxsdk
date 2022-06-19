@@ -1,4 +1,3 @@
-
 # Created by https://www.gitignore.io/api/c,git,c++,cmake,ninja
 # Edit at https://www.gitignore.io/?templates=c,git,c++,cmake,ninja
 
@@ -112,3 +111,5 @@ _deps
 .ninja_log
 
 # End of https://www.gitignore.io/api/c,git,c++,cmake,ninja
+
+/build
