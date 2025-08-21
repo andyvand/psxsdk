@@ -6,7 +6,7 @@ set(TOOLCHAIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/toolchain")
 message(STATUS "TOOLCHAIN_DIR: ${TOOLCHAIN_DIR}")
 ExternalProject_Add(binutils
                     URL                 https://sourceware.org/pub/binutils/releases/binutils-2.45.tar.xz
-                    URL_HASH            SHA256=f6e4d41fd5fc778b06b7891457b3620da5ecea1006c6a4a41ae998109f85a800
+                    URL_HASH            SHA256=c50c0e7f9cb188980e2cc97e4537626b1672441815587f1eab69d2a1bfbef5d2
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
                     CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --target=mipsel-unknown-elf --with-float=soft --enable-lto --enable-static --disable-shared
                     BUILD_COMMAND       make -j${N}
@@ -15,7 +15,7 @@ ExternalProject_Add(binutils
 
 ExternalProject_Add(m4
                     URL                 https://ftp.gnu.org/gnu/m4/m4-1.4.20.tar.xz
-                    URL_HASH            SHA256=63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96
+                    URL_HASH            SHA256=e236ea3a1ccf5f6c270b1c4bb60726f371fa49459a8eaaebc90b216b328daf2b
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
                     CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-static --disable-shared
                     BUILD_COMMAND       make -j${N}
@@ -35,7 +35,7 @@ ExternalProject_Add(gmp
 ExternalProject_Add(mpfr
                     DEPENDS             gmp
                     URL                 https://www.mpfr.org/mpfr-current/mpfr-4.2.2.tar.xz
-                    URL_HASH            SHA256=277807353a6726978996945af13e52829e3abd7a9a5b7fb2793894e18f1fcbb2
+                    URL_HASH            SHA256=b67ba0383ef7e8a8563734e2e889ef5ec3c3b898a01d00fa0a6869ad81c6ce01
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
                     CONFIGURE_COMMAND   <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --with-gmp=<INSTALL_DIR> --enable-lto --enable-static --disable-shared
                     BUILD_COMMAND       make -j${N}
@@ -57,7 +57,7 @@ set(gcc_version "${gcc_version}" PARENT_SCOPE)
 ExternalProject_Add(gcc
                     DEPENDS             binutils gmp mpfr mpc
                     URL                 https://fosszone.csd.auth.gr/gnu/gcc/gcc-${gcc_version}/gcc-${gcc_version}.tar.xz
-                    URL_HASH            SHA256=e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da
+                    URL_HASH            SHA256=438fd996826b0c82485a29da03a72d71d6e3541a83ec702df4271f6fe025d24e
                     INSTALL_DIR         ${TOOLCHAIN_DIR}
                     CONFIGURE_COMMAND   LD_LIBRARY_PATH=<INSTALL_DIR>/lib <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --disable-libada --disable-libssp --target=mipsel-unknown-elf --with-float=soft --with-gmp=<INSTALL_DIR> --with-gmp-lib=<INSTALL_DIR>/lib/libgmp.a --with-mpfr=<INSTALL_DIR> --with-mpfr-lib=<INSTALL_DIR>/lib/libmpfr.a --with-mpc=<INSTALL_DIR> --with-mpc-lib=<INSTALL_DIR>/lib/libmpc.a --disable-libquadmath --enable-stage1-languages=c --enable-languages=c --enable-lto --enable-static --disable-shared
                     BUILD_COMMAND       LD_LIBRARY_PATH=<INSTALL_DIR>/lib make -j${N}
