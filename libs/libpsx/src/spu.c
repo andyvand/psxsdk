@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 #include <psx.h>
 
 #define SPU_ADDR				*((unsigned short*)0x1f801da6)

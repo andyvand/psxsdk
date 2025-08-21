@@ -7,6 +7,8 @@
 #include "modplay.h"
 #include "modtbl.h" // Period -> frequency table for ProTracker MODs
 
+extern void MODStop(ModMusic *m);
+extern void MODPlay_669(ModMusic *m, int *t);
 
 ModMusic *MODLoad_MOD(void *d)
 {

@@ -1,4 +1,6 @@
 #include <psx.h>
+#include <stdio.h>
+
 #include "memory.h"
 
 extern int __bss_start[];

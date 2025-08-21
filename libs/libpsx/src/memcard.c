@@ -10,9 +10,18 @@
  #include <stdlib.h>
  #include <fcntl.h>
  #include <memcard.h>
+ #include <stdlib.h>
+ #include <string.h>
+
+ #ifdef __GNUC__
+ #include <unistd.h>
+ #endif
 
 char fname_buf[256];
 char slot_hdr[8192];
+
+extern void StartCARD();
+extern void StopCARD();
 
 void McdDefToHeader(McdSlotDef *def, unsigned char *hdr)
 {

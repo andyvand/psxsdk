@@ -244,7 +244,7 @@ void MODSetMaxVolume(unsigned short max_volume)
 
 // Some code might use this, so use a stub.
 
-int SsFreqToPitch(int hz)
+unsigned short SsFreqToPitch(int hz)
 {
 	return 0;
 }

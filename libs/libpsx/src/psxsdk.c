@@ -6,12 +6,20 @@
  
 #include <psx.h>
 #include <stdio.h>
+#include <string.h>
 
 #define IPENDING				*((unsigned int*)0x1f801070)
 #define IMASK					*((unsigned int*)0x1f801074)
 #define RCNT_COUNT(x)			*((unsigned int*)(0x1f801100 + (x<<4)))
 #define RCNT_MODE(x)			*((unsigned int*)(0x1f801104 + (x<<4)))
 #define RCNT_TARGET(x)		*((unsigned int*)(0x1f801108 + (x<<4)))
+
+extern void _bu_init();
+extern void _96_init();
+extern void _96_remove();
+extern void StartCARD();
+extern void StopCARD();
+extern void InitCARD(int);
 
 const char *sysromver_unavail = "System ROM Version Unavailable";
 
@@ -27,7 +35,7 @@ extern int *rcnt_handler();
 
 unsigned int vblank_queue_buf[4] = {0x0, /* Will contain next interrupt handler in queue */
                                     0x0, /* func1 */
-				    vblank_handler, /* func2 */
+				    (unsigned int)vblank_handler, /* func2 */
 				    0x0, /* pad */
 				   };
 				    
@@ -263,7 +271,7 @@ void SetVBlankHandler(void (*callback)())
 	
 	IMASK|=1;
 	
-	vblank_handler_event_id = OpenEvent(RCntCNT3, 2, 0x1000, vblank_handler);
+	vblank_handler_event_id = OpenEvent(RCntCNT3, 2, 0x1000, (int *(*)())vblank_handler);
 	EnableEvent(vblank_handler_event_id);
 	
 	vblank_handler_callback = callback;

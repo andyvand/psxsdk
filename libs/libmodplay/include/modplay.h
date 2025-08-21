@@ -91,6 +91,13 @@ void MODSetBaseVoice(int base_voice);
 // Internal function...
 
 void MODPlay_func(ModMusic *m, int c, int s, int p, int vl, int vr);
+void MODPlay_669(ModMusic *m, int *t);
+
+void MODStop(ModMusic *m);
+
+unsigned short SsFreqToPitch(int hz);
+void SsKeyOnMask(int mask);
+void SsKeyOffMask(int mask);
 
 extern int modplay_int_cnt;
 

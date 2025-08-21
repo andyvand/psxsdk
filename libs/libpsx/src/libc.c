@@ -17,6 +17,10 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#ifdef __GNUC__
+#include <unistd.h>
+#endif
+
 char onesec_buf[2048];
 int errno;
 

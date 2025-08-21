@@ -7,6 +7,8 @@
 #include "modplay.h"
 #include "c669tbl.h" // PSX pitch table for Composer 669 modules
 
+extern void MODStop(ModMusic *m);
+
 ModMusic *MODLoad_669(void *d)
 {
 	unsigned char *c = d;

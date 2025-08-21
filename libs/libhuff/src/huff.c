@@ -4,6 +4,7 @@
 // by Joe Wingbermuehle
 
 #include <psx.h>
+#include <string.h>
 #include "huff.h"
 
 #define BUFFER_SIZE	1024
